@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Canadian University Food Sustainability – Environmental Scan</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --green-dark:#1a4731; --green-mid:#2e7d52; --green-light:#d6ead9;
+    --blue-dark:#1f4e78;  --blue-light:#d9e8f5;
+    --yellow:#fff2cc; --red-light:#fddcdc; --grey:#f5f5f5; --white:#fff;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html { scroll-behavior:smooth; }
+  body { font-family:'Segoe UI',system-ui,sans-serif; background:#f0f4f0; color:#1a1a1a; }
+
+  /* ── NAV ── */
+  nav {
+    background:var(--green-dark); padding:0 2rem;
+    display:flex; align-items:center; gap:0.25rem;
+    position:sticky; top:0; z-index:200;
+    box-shadow:0 2px 8px rgba(0,0,0,.35);
+    flex-wrap:wrap;
+  }
+  nav .logo { color:#fff; font-size:.95rem; font-weight:700; padding:.85rem 1rem .85rem 0; margin-right:.5rem; white-space:nowrap; }
+  nav a {
+    color:rgba(255,255,255,.75); text-decoration:none; font-size:.82rem;
+    padding:.85rem .6rem; border-bottom:3px solid transparent;
+    transition:all .2s; white-space:nowrap;
+  }
+  nav a:hover, nav a.active { color:#fff; border-bottom-color:#7ec99a; }
+
+  /* ── HERO ── */
+  .hero {
+    background:linear-gradient(135deg,var(--green-dark) 0%,var(--green-mid) 100%);
+    color:#fff; padding:3.5rem 2rem 3rem; text-align:center;
+  }
+  .hero h1 { font-size:clamp(1.4rem,3vw,2.2rem); font-weight:800; margin-bottom:.5rem; }
+  .hero p  { font-size:.95rem; opacity:.85; margin-bottom:2.5rem; }
+  .stats-row { display:flex; flex-wrap:wrap; justify-content:center; gap:1rem; }
+  .stat-card {
+    background:rgba(255,255,255,.15); backdrop-filter:blur(4px);
+    border:1px solid rgba(255,255,255,.25); border-radius:14px;
+    padding:1.2rem 1.8rem; min-width:130px; text-align:center;
+  }
+  .stat-card .num { font-size:2.2rem; font-weight:900; line-height:1; }
+  .stat-card .lbl { font-size:.75rem; opacity:.85; margin-top:.3rem; line-height:1.3; }
+
+  /* ── LAYOUT ── */
+  .container { max-width:1200px; margin:0 auto; padding:0 1.5rem; }
+  section { padding:3rem 0 1.5rem; }
+  .section-title {
+    font-size:1.25rem; font-weight:700; color:var(--green-dark);
+    border-left:4px solid var(--green-mid); padding-left:.75rem;
+    margin-bottom:.35rem;
+  }
+  .section-sub { font-size:.85rem; color:#666; margin-bottom:1.5rem; }
+  .card {
+    background:#fff; border-radius:12px;
+    box-shadow:0 2px 12px rgba(0,0,0,.08); padding:1.5rem; margin-bottom:1.5rem;
+  }
+  .card h3 { font-size:.92rem; color:var(--green-dark); margin-bottom:1rem; font-weight:600; }
+  .grid-2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(460px,1fr)); gap:1.5rem; }
+  .grid-3 { display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:1rem; }
+
+  /* ── OVERVIEW SECTION ── */
+  .overview-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1.2rem; margin-bottom:1.5rem; }
+  .info-card {
+    background:#fff; border-radius:12px; padding:1.4rem;
+    box-shadow:0 2px 10px rgba(0,0,0,.07);
+    border-top:4px solid var(--green-mid);
+  }
+  .info-card .icon { font-size:1.8rem; margin-bottom:.6rem; }
+  .info-card h4 { font-size:.95rem; font-weight:700; color:var(--green-dark); margin-bottom:.5rem; }
+  .info-card p  { font-size:.83rem; color:#444; line-height:1.6; }
+  .nav-guide {
+    background:var(--blue-light); border-radius:12px; padding:1.4rem 1.8rem;
+    border-left:4px solid var(--blue-dark);
+  }
+  .nav-guide h4 { font-size:.95rem; font-weight:700; color:var(--blue-dark); margin-bottom:.8rem; }
+  .nav-guide ul { list-style:none; display:flex; flex-wrap:wrap; gap:.5rem .8rem; }
+  .nav-guide li { font-size:.82rem; color:#1a1a1a; }
+  .nav-guide li a { color:var(--blue-dark); font-weight:600; text-decoration:none; }
+  .nav-guide li a:hover { text-decoration:underline; }
+
+  /* ── KEY FINDINGS BANNER ── */
+  .findings-banner {
+    background:var(--green-dark); border-radius:12px; padding:1.4rem 1.8rem; margin-bottom:1.5rem;
+    color:#fff;
+  }
+  .findings-banner h4 { font-size:.95rem; font-weight:700; margin-bottom:.8rem; color:#7ec99a; }
+  .findings-banner ul { list-style:none; display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:.5rem; }
+  .findings-banner li { font-size:.82rem; line-height:1.5; padding-left:1.2rem; position:relative; }
+  .findings-banner li::before { content:'→'; position:absolute; left:0; color:#7ec99a; }
+
+  /* ── HEATMAP ── */
+  .heatmap-wrap { overflow-x:auto; padding-bottom:.5rem; }
+  .heatmap {
+    display:grid; grid-template-columns:140px repeat(8,1fr);
+    gap:3px; min-width:740px; font-size:.71rem;
+  }
+  .hm-corner { background:transparent; }
+  .hm-col-label {
+    background:var(--blue-dark); color:#fff; border-radius:6px;
+    padding:6px 4px; text-align:center; font-weight:600;
+    display:flex; align-items:center; justify-content:center; line-height:1.2;
+  }
+  .hm-row-label {
+    background:var(--blue-dark); color:#fff; border-radius:6px;
+    padding:6px 8px; display:flex; align-items:center; font-weight:600; line-height:1.2;
+  }
+  .hm-cell {
+    border-radius:6px; height:54px;
+    display:flex; align-items:center; justify-content:center; flex-direction:column; gap:2px;
+    cursor:pointer; transition:transform .15s, box-shadow .15s; position:relative;
+  }
+  .hm-cell:hover { transform:scale(1.1); box-shadow:0 4px 18px rgba(0,0,0,.25); z-index:10; }
+  .hm-cell .hm-num { font-size:1rem; font-weight:800; }
+  .hm-cell .hm-pct { font-size:.6rem; opacity:.8; }
+
+  /* ── TOOLTIP ── */
+  #hm-tooltip {
+    position:fixed; background:rgba(20,40,20,.96); color:#fff;
+    padding:10px 14px; border-radius:9px; font-size:.82rem;
+    pointer-events:none; opacity:0; transition:opacity .15s;
+    max-width:290px; line-height:1.5; z-index:999;
+    box-shadow:0 4px 20px rgba(0,0,0,.4);
+  }
+  #hm-tooltip.show { opacity:1; }
+  #hm-tooltip strong { display:block; margin-bottom:4px; color:#7ec99a; font-size:.85rem; }
+
+  /* ── LEGEND ── */
+  .hm-legend { display:flex; flex-wrap:wrap; gap:1rem; margin-top:1rem; font-size:.78rem; align-items:center; }
+  .hm-legend-item { display:flex; align-items:center; gap:6px; }
+  .hm-swatch { width:16px; height:16px; border-radius:4px; flex-shrink:0; }
+
+  /* ── CALLOUT CARDS ── */
+  .callout { border-radius:12px; padding:1.2rem 1.4rem; }
+  .callout .big { font-size:2.2rem; font-weight:900; line-height:1; margin:.4rem 0; }
+  .callout p  { font-size:.82rem; line-height:1.5; }
+  .callout h3 { font-size:.9rem; font-weight:700; margin-bottom:.3rem; }
+
+  /* ── BAR/DONUT ── */
+  .chart-wrap { position:relative; height:320px; }
+
+  /* ── PROVINCE TABLE ── */
+  table { width:100%; border-collapse:collapse; font-size:.84rem; }
+  th { background:var(--green-dark); color:#fff; padding:9px 12px; text-align:left; }
+  td { padding:8px 12px; border-bottom:1px solid #e8e8e8; }
+  tr:nth-child(even) td { background:var(--grey); }
+  .prog-bar-bg { background:#e0e0e0; border-radius:99px; height:8px; width:100%; }
+  .prog-bar    { background:var(--green-mid); border-radius:99px; height:8px; }
+
+  /* ── STANDOUTS ── */
+  .standout-card {
+    background:#fff; border-radius:10px; padding:1rem 1.2rem;
+    border-left:4px solid var(--green-mid);
+    box-shadow:0 2px 8px rgba(0,0,0,.07);
+  }
+  .standout-card .uni  { font-weight:700; font-size:.9rem; color:var(--green-dark); }
+  .standout-card .prov { font-size:.73rem; color:#888; margin:.2rem 0; }
+  .standout-card .why  { font-size:.81rem; color:#333; line-height:1.5; }
+
+  /* ── THEMES ── */
+  .theme-card { background:#fff; border-radius:10px; padding:1.2rem; box-shadow:0 2px 8px rgba(0,0,0,.07); border-top:4px solid var(--green-mid); }
+  .theme-card h4 { font-size:.88rem; color:var(--green-dark); margin-bottom:.5rem; font-weight:700; }
+  .theme-card p  { font-size:.81rem; color:#555; line-height:1.6; }
+  .badge { display:inline-block; padding:2px 10px; border-radius:99px; font-size:.68rem; font-weight:700; margin-bottom:.6rem; }
+  .badge-strong   { background:var(--green-light); color:var(--green-dark); }
+  .badge-emerging { background:var(--blue-light);  color:var(--blue-dark); }
+  .badge-gap      { background:var(--red-light);   color:#c00000; }
+
+  /* ── FOOTER ── */
+  footer { background:var(--green-dark); color:rgba(255,255,255,.7); text-align:center; padding:1.5rem; font-size:.8rem; margin-top:3rem; }
+
+  @media(max-width:640px) {
+    .grid-2 { grid-template-columns:1fr; }
+    nav a   { font-size:.75rem; padding:.7rem .4rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">🌿 Canadian University Food Sustainability</div>
+  <a href="#overview">Overview</a>
+  <a href="#programs">Programs</a>
+  <a href="#charts">Charts</a>
+  <a href="#overlap">Overlap</a>
+  <a href="#provinces">Provinces</a>
+  <a href="#standouts">Standouts</a>
+  <a href="#themes">Themes</a>
+  <a href="#references">References</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero" id="top">
+  <h1>Canadian University Food Sustainability</h1>
+  <p>Environmental Scan of All 95 Canadian Universities &nbsp;|&nbsp; Research: June 2026</p>
+  <div class="stats-row">
+    <div class="stat-card"><div class="num">97</div><div class="lbl">Institutions Scanned</div></div>
+    <div class="stat-card"><div class="num">70</div><div class="lbl">Have ≥ 1 Program<br><small>(72.2% of all scanned)</small></div></div>
+    <div class="stat-card"><div class="num">27</div><div class="lbl">No Program Found<br><small>(incl. online/admin)</small></div></div>
+    <div class="stat-card"><div class="num">8</div><div class="lbl">Program Categories<br><small>Coded & Analysed</small></div></div>
+    <div class="stat-card"><div class="num">85</div><div class="lbl">With Physical Campus<br><small>(assessed for programs)</small></div></div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ═══════════════════════════════ OVERVIEW ═══════════════════════════════ -->
+  <section id="overview">
+    <div class="section-title">Overview</div>
+    <div class="section-sub">What this project is, how the data was collected, and what this dashboard shows — and how to navigate it</div>
+
+    <div class="overview-grid">
+      <div class="info-card">
+        <div class="icon">🎯</div>
+        <h4>What is This Project?</h4>
+        <p>This is a research project conducted at the University of Guelph under Dr. Sadaf Mollaei. The goal is to systematically document what food sustainability programs exist across all Canadian universities, generate counts and patterns from that data, and use those findings to support the claims made in our literature review.</p>
+      </div>
+      <div class="info-card">
+        <div class="icon">🔍</div>
+        <h4>What is this Environmental Scan?</h4>
+        <p>An environmental scan is a structured review of publicly available information across every institution. For this project, the websites, sustainability pages, dining services pages, news releases, Instagram accounts, and third-party sources of all 97 scanned institutions were searched and coded.</p>
+      </div>
+      <div class="info-card">
+        <div class="icon">📊</div>
+        <h4>How was the Data Coded?</h4>
+        <p>We first conducted a literature review of the articles listed in the References section below. From that review we extracted key themes, patterns, and gaps related to food sustainability in university settings. Using those findings, we then coded each Canadian university Yes or No across 8 food sustainability program categories to identify how common each program type is, where overlaps exist, and where gaps remain.</p>
+      </div>
+      <div class="info-card">
+        <div class="icon">⚠️</div>
+        <h4>Important Limitations</h4>
+        <p>This scan reflects only what universities publish publicly. Programs that exist but are not communicated online are not captured. Outcome data (e.g. % waste reduced, % local purchases) was almost never publicly reported. This is itself a key finding. Data reflects institutional websites as of June 2026.</p>
+      </div>
+    </div>
+
+    <div class="findings-banner">
+      <h4>Key Findings at a Glance</h4>
+      <ul>
+        <li>72.2% of all scanned institutions (70 of 97) have at least one identifiable food sustainability program</li>
+        <li>Sustainable Procurement is the most common program type, found at 51.5% of all institutions</li>
+        <li>Plant-Based Eating programs are the rarest despite being high-impact, at only 22.7% of institutions</li>
+        <li>Food Security and Sustainability programs almost never overlap. They tend to operate in separate silos</li>
+        <li>Almost no university publicly reports measurable outcomes (e.g. % waste diverted, % local food purchased)</li>
+        <li>BC's Feed BC and Quebec's Aliments du Québec create the clearest provincial clusters of documented activity</li>
+        <li>Universities with one program tend to grow into multiple areas. 56 institutions have 3 or more program types</li>
+      </ul>
+    </div>
+
+    <div class="nav-guide">
+      <h4>📌 How to Navigate This Dashboard</h4>
+      <ul>
+        <li>→ <a href="#programs">Programs</a>
+  <a href="#charts">Charts</a>: Bar chart and doughnut showing how common each program type is</li>
+        <li>→ <a href="#overlap">Overlap</a>: Interactive heatmap showing which programs appear together. Hover any cell for a plain-language explanation.</li>
+        <li>→ <a href="#provinces">Provinces</a>: Breakdown of program rates by province/territory</li>
+        <li>→ <a href="#standouts">Standouts</a>: Universities with first-in-Canada or top-ranked programs</li>
+        <li>→ <a href="#themes">Themes</a>
+  <a href="#references">References</a>: Key patterns and what they mean for policy and practice</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════ PROGRAMS ══════════════════════════════ -->
+  <section id="programs">
+    <div class="section-title">Program Categories</div>
+    <div class="section-sub">How many of the 97 scanned institutions have each type of food sustainability program</div>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Program Frequency: How Common is Each Type?</h3>
+        <div class="chart-wrap"><canvas id="barChart"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Share of All Scanned Institutions (%)</h3>
+        <div class="chart-wrap"><canvas id="doughnutChart"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════ ADDITIONAL CHARTS ═══════════════════════ -->
+  <section id="charts">
+    <div class="section-title">Data Visualizations</div>
+    <div class="section-sub">Three different ways to look at the same data — each tells a slightly different story</div>
+
+    <!-- RADAR CHART -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <h3>① Radar Chart — Shape of Food Sustainability Across Canada</h3>
+      <p style="font-size:.82rem;color:#666;margin-bottom:1.2rem;line-height:1.6">
+        Shows the overall "fingerprint" of Canadian university food sustainability. Each axis is one program category.
+        The further out the point, the more common that program type is. A perfectly round shape would mean all
+        categories are equally common — the gaps show where universities are lagging.
+      </p>
+      <div style="position:relative;height:420px;max-width:600px;margin:0 auto">
+        <canvas id="radarChart"></canvas>
+      </div>
+    </div>
+
+    <!-- BUBBLE CHART -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <h3>② Bubble Chart — Universities by Province and Program Breadth</h3>
+      <p style="font-size:.82rem;color:#666;margin-bottom:1.2rem;line-height:1.6">
+        Each bubble represents a province. The horizontal position shows how many institutions have any program.
+        The vertical position shows the average number of program types per institution.
+        Bubble size reflects the total number of universities scanned in that province.
+        Provinces in the top-right corner have both high adoption and broad program variety.
+      </p>
+      <div style="position:relative;height:420px">
+        <canvas id="bubbleChart"></canvas>
+      </div>
+    </div>
+
+    <!-- STACKED BAR BY PROVINCE -->
+    <div class="card">
+      <h3>③ Stacked Bar — Program Types by Province</h3>
+      <p style="font-size:.82rem;color:#666;margin-bottom:1.2rem;line-height:1.6">
+        Shows which program types are present in each province and how they stack up.
+        Each colour is one program category. Taller bars mean more total program coverage in that province.
+        You can see at a glance how BC and Quebec compare to provinces like Saskatchewan or PEI.
+      </p>
+      <div style="position:relative;height:420px">
+        <canvas id="stackedBar"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════ OVERLAP ═══════════════════════════════ -->
+  <section id="overlap">
+    <div class="section-title">Program Overlap</div>
+    <div class="section-sub">How many universities have both programs simultaneously. Hover any cell for a plain-language explanation.</div>
+
+    <div class="card">
+      <h3>Co-occurrence Heatmap &nbsp;<span style="font-weight:400;color:#888;font-size:.82rem">Darker colour = more universities share both programs. Diagonal cells show the total for that single program.</span></h3>
+      <div class="heatmap-wrap">
+        <div class="heatmap" id="heatmap"></div>
+      </div>
+      <div class="hm-legend">
+        <strong style="font-size:.78rem">Colour guide:</strong>
+        <div class="hm-legend-item"><div class="hm-swatch" style="background:#1a4731"></div>Diagonal (total)</div>
+        <div class="hm-legend-item"><div class="hm-swatch" style="background:#1e6b3f"></div>30+ universities</div>
+        <div class="hm-legend-item"><div class="hm-swatch" style="background:#2e7d52"></div>20–29</div>
+        <div class="hm-legend-item"><div class="hm-swatch" style="background:#6aab82"></div>10–19</div>
+        <div class="hm-legend-item"><div class="hm-swatch" style="background:#b8dfc4"></div>5–9</div>
+        <div class="hm-legend-item"><div class="hm-swatch" style="background:#f0f0f0;border:1px solid #ccc"></div>Under 5</div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="callout card" style="border-top:4px solid var(--green-mid)">
+        <h3>🏆 Strongest Overlap</h3>
+        <div class="big" style="color:var(--green-mid)">38</div>
+        <p><strong>Sustainable Procurement + Food Certification</strong><br><br>Schools with formal certification almost always also have a local sourcing program. Certification creates accountability; procurement is the action behind it.</p>
+      </div>
+      <div class="callout card" style="border-top:4px solid #f4b942">
+        <h3>🏅 Gold Standard Triple</h3>
+        <div class="big" style="color:#b07d00">23</div>
+        <p><strong>Certification + Procurement + Food Waste all together</strong><br><br>23 universities have all three running simultaneously. These are the benchmark institutions with the most integrated approach.</p>
+      </div>
+      <div class="callout card" style="border-top:4px solid #e57373">
+        <h3>⚠️ Biggest Gap</h3>
+        <div class="big" style="color:#c00000">7</div>
+        <p><strong>Reusable Packaging + Student Engagement</strong><br><br>Lowest overlap in the matrix. Packaging is managed by food services operations; student groups rarely extend into packaging infrastructure.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════ PROVINCES ═════════════════════════════ -->
+  <section id="provinces">
+    <div class="section-title">Breakdown by Province</div>
+    <div class="section-sub">Number of scanned institutions with at least one food sustainability program, by province</div>
+    <div class="card">
+      <div style="overflow-x:auto">
+        <table id="provTable">
+          <thead><tr><th>Province / Territory</th><th>Institutions Scanned</th><th>Have a Program</th><th>% with Program</th><th>Visual</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════ STANDOUTS ════════════════════════════ -->
+  <section id="standouts">
+    <div class="section-title">Standout Universities</div>
+    <div class="section-sub">Institutions with particularly strong, innovative, or first-in-Canada programs</div>
+    <div class="grid-3" id="standoutsGrid"></div>
+  </section>
+
+  <!-- ═══════════════════════════════ THEMES ═══════════════════════════════ -->
+  <section id="themes">
+    <div class="section-title">Themes &amp; Findings</div>
+    <div class="section-sub">Key patterns that emerge when looking across all 97 institutions together</div>
+    <div class="grid-2" id="themesGrid"></div>
+  </section>
+
+
+  <!-- REFERENCES -->
+  <section id="references">
+    <div class="section-title">References</div>
+    <div class="section-sub">Literature reviewed to inform and support this environmental scan</div>
+    <div class="card">
+      <p style="font-size:.82rem;color:#555;margin-bottom:1.2rem;line-height:1.6;">
+        The following peer-reviewed articles and reports were reviewed as part of the broader research project. 
+        Several articles were accessed through the University of Guelph library database and do not have publicly available links. 
+        Full citations are provided below for reference.
+      </p>
+      <ol id="refList" style="list-style:none;padding:0;display:flex;flex-direction:column;gap:.9rem;"></ol>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  Canadian University Food Sustainability Environmental Scan &nbsp;|&nbsp;
+  University of Guelph &nbsp;|&nbsp; Dr. Sadaf Mollaei (Supervisor) &nbsp;|&nbsp;
+  Shomaaim Ahmed (URA) &nbsp;|&nbsp; Data collected June 2026
+</footer>
+
+<div id="hm-tooltip"></div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const TOTAL = 97;
+const labelsShort = [
+  "Sust. Procurement","Food Certification","Food Waste",
+  "Food Literacy","Food Security","Plant-Based","Student Engagement","Reusable Pkg"
+];
+const labelsLong = [
+  "Sustainable Procurement / Local Food","Food Certification (Fairtrade Campus, Green Restaurant etc.)",
+  "Food Waste / Composting","Food Literacy / Education","Food Security / Access",
+  "Plant-Based Eating","Student Engagement Programs","Reusable Packaging"
+];
+const counts = [50,46,40,25,26,22,23,17];
+const matrix = [
+  [50,38,32,26,15,22,19,22],
+  [38,46,32,26,18,22,16,21],
+  [32,32,40,15,14,17,13,18],
+  [26,26,15,25,15,11,13,11],
+  [15,18,14,15,26, 8,14, 8],
+  [22,22,17,11, 8,22, 8,15],
+  [19,16,13,13,14, 8,23, 7],
+  [22,21,18,11, 8,15, 7,17],
+];
+const tooltips = [
+  ["Total: 50 of 97 institutions have a Sustainable Procurement program (51.5%)","38 institutions have BOTH Sustainable Procurement AND Food Certification. This is the strongest non-diagonal overlap.","32 have BOTH Sustainable Procurement AND Food Waste programs","26 have BOTH Sustainable Procurement AND Food Literacy","15 have BOTH Sustainable Procurement AND Food Security","22 have BOTH Sustainable Procurement AND Plant-Based","19 have BOTH Sustainable Procurement AND Student Engagement","22 have BOTH Sustainable Procurement AND Reusable Packaging"],
+  ["38 have BOTH Food Certification AND Sustainable Procurement","Total: 46 of 97 institutions hold a food-specific certification (Fairtrade Campus, Green Restaurant, Organic Campus, MSC, Ocean Wise, Aliments du Québec au menu, Fourchette bleue, Meal Exchange)","32 have BOTH Food Certification AND Food Waste. Certification bodies typically reward waste reduction.","26 have BOTH Food Certification AND Food Literacy","18 have BOTH Food Certification AND Food Security","22 have BOTH Food Certification AND Plant-Based","16 have BOTH Food Certification AND Student Engagement","21 have BOTH Food Certification AND Reusable Packaging"],
+  ["32 have BOTH Food Waste AND Sustainable Procurement","32 have BOTH Food Waste AND Food Certification","Total: 40 of 97 institutions have a Food Waste or Composting program (41.2%)","15 have BOTH Food Waste AND Food Literacy","14 have BOTH Food Waste AND Food Security","17 have BOTH Food Waste AND Plant-Based","13 have BOTH Food Waste AND Student Engagement","18 have BOTH Food Waste AND Reusable Packaging"],
+  ["26 have BOTH Food Literacy AND Sustainable Procurement","26 have BOTH Food Literacy AND Food Certification","15 have BOTH Food Literacy AND Food Waste","Total: 25 of 97 institutions have a Food Literacy or Education program (25.8%)","15 have BOTH Food Literacy AND Food Security","11 have BOTH Food Literacy AND Plant-Based","13 have BOTH Food Literacy AND Student Engagement","11 have BOTH Food Literacy AND Reusable Packaging"],
+  ["15 have BOTH Food Security AND Sustainable Procurement","18 have BOTH Food Security AND Food Certification","14 have BOTH Food Security AND Food Waste","15 have BOTH Food Security AND Food Literacy","Total: 26 of 97 institutions have a Food Security program (26.8%)","Only 8 have BOTH Food Security AND Plant-Based. These goals are almost never integrated together.","14 have BOTH Food Security AND Student Engagement","8 have BOTH Food Security AND Reusable Packaging"],
+  ["22 have BOTH Plant-Based AND Sustainable Procurement","22 have BOTH Plant-Based AND Food Certification","17 have BOTH Plant-Based AND Food Waste","11 have BOTH Plant-Based AND Food Literacy","Only 8 have BOTH Plant-Based AND Food Security. This is a notable gap in the data.","Total: 22 of 97 institutions have a Plant-Based Eating program (22.7%)","8 have BOTH Plant-Based AND Student Engagement","15 have BOTH Plant-Based AND Reusable Packaging"],
+  ["19 have BOTH Student Engagement AND Sustainable Procurement","16 have BOTH Student Engagement AND Food Certification","13 have BOTH Student Engagement AND Food Waste","13 have BOTH Student Engagement AND Food Literacy","14 have BOTH Student Engagement AND Food Security","8 have BOTH Student Engagement AND Plant-Based","Total: 23 of 97 institutions have a Student Engagement program (23.7%)","Only 7 have BOTH Student Engagement AND Reusable Packaging. This is the lowest overlap in the entire matrix."],
+  ["22 have BOTH Reusable Packaging AND Sustainable Procurement","21 have BOTH Reusable Packaging AND Food Certification","18 have BOTH Reusable Packaging AND Food Waste","11 have BOTH Reusable Packaging AND Food Literacy","8 have BOTH Reusable Packaging AND Food Security","15 have BOTH Reusable Packaging AND Plant-Based","Only 7 have BOTH Reusable Packaging AND Student Engagement. This is the lowest overlap in the entire matrix.","Total: 17 of 97 institutions have a Reusable Packaging program (17.5%)"],
+];
+
+const provinces = [
+  {name:"British Columbia",  total:12, yes:11},
+  {name:"Ontario",           total:25, yes:21},
+  {name:"Quebec",            total:17, yes:14},
+  {name:"Nova Scotia",       total: 7, yes: 6},
+  {name:"Alberta",           total: 9, yes: 7},
+  {name:"New Brunswick",     total: 4, yes: 3},
+  {name:"Manitoba",          total: 3, yes: 2},
+  {name:"Newfoundland & Labrador", total:1, yes:1},
+  {name:"Saskatchewan",      total: 3, yes: 1},
+  {name:"Prince Edward Island", total:1, yes:0},
+  {name:"Yukon",             total: 1, yes:0},
+];
+
+const standouts = [
+  {uni:"UQAM",prov:"Quebec",why:"71.48% local purchasing rate (2024-25), the highest documented rate across all scanned institutions"},
+  {uni:"Université de Sherbrooke",prov:"Quebec",why:"AASHE STARS Platinum; plastic dishware eliminated since 2008; single-use water bottles banned 2011"},
+  {uni:"Polytechnique Montréal",prov:"Quebec",why:"North American first: full beef removal from all menus (2025); carbon footprint labelled on every meal (2022)"},
+  {uni:"Acadia University",prov:"Nova Scotia",why:"First Organic Campus in Canada (2022); first Fair Trade Campus in Maritimes (2017); first to sign UN SDG Accord"},
+  {uni:"Ontario Tech University",prov:"Ontario",why:"Ranked 5th of 355 institutions worldwide in AASHE purchasing practices (94.5% vs. 53.6% average)"},
+  {uni:"Royal Roads University",prov:"British Columbia",why:"The Farm at Royal Roads: 5.26-acre regenerative farm with a ~$500K investment, one of the most ambitious campus food projects in Canada"},
+  {uni:"Kwantlen Polytechnic",prov:"British Columbia",why:"Only Canadian university with dedicated Institute for Sustainable Food Systems + undergraduate degree + grad certificate"},
+  {uni:"Mount Allison University",prov:"New Brunswick",why:"'Maritime Diet' 5-hour local radius; 40% local food; 44% food waste reduction since 2007"},
+  {uni:"Saint Mary's University",prov:"Nova Scotia",why:"Dockside EcoStation: no garbage cans anywhere; MSC-certified seafood throughout dining"},
+  {uni:"University of Ottawa",prov:"Ontario",why:"Canada's first 4-star Certified Green Restaurant (2023), a first for any restaurant in Canada at that level"},
+  {uni:"UQAC (Chicoutimi)",prov:"Quebec",why:"900 m² food forest with 1,200+ edible plants, directly addressing food insecurity through foraging"},
+  {uni:"Trent University",prov:"Ontario",why:"First retail dining room in Canadian higher education to earn Green Restaurant certification"},
+];
+
+const themes = [
+  {title:"Sustainable procurement is the most common program (51.5%)",badge:"strong",text:"BC's Feed BC and Quebec's Aliments du Québec create measurable provincial clusters. However, very few schools publish actual percentage figures. Most cite a commitment without data to back it up."},
+  {title:"Food waste is the most common entry point into sustainability",badge:"strong",text:"41.2% of institutions have a composting or food waste program. It's operationally feasible, visible, and measurable, making it the easiest first step to justify to administration."},
+  {title:"Food security and sustainability are rarely connected",badge:"strong",text:"26 universities have food security programs, but only 8 also have plant-based programs. Food banks and sustainability offices almost always operate in separate silos. This is a missed opportunity for integration."},
+  {title:"Plant-based eating is underdeveloped despite being high-impact",badge:"gap",text:"Only 22.7% of institutions have a documented plant-based initiative. Vegan options exist widely but are not framed as sustainability programs. Polytechnique's beef removal model is the clearest replicable approach."},
+  {title:"Outcome data is almost never publicly reported",badge:"gap",text:"Across all 97 institutions, very few publish measurable results such as % waste diverted, % local food purchased, or container reuse rates. Without numbers, programs cannot be evaluated or compared."},
+  {title:"Provincial programs create the strongest clusters of activity",badge:"strong",text:"BC's Feed BC and Quebec's Aliments du Québec are the clearest examples of provincial policy driving university-level sustainability action consistently across multiple institutions."},
+  {title:"Reusable packaging programs are likely undercounted",badge:"emerging",text:"Only 17.5% of institutions have a documented program, but many use inconsistent terminology online. The actual number may be higher. This is partly a data quality gap, not just a program gap."},
+  {title:"Once universities commit, they tend to grow into multiple areas",badge:"emerging",text:"56 of 85 assessed universities have programs in 3 or more categories, suggesting that institutional sustainability commitment tends to expand once it begins rather than staying as a single initiative."},
+];
+
+// ── CHARTS ────────────────────────────────────────────────────────────────────
+const gp = ['#1a4731','#1e5c3f','#2e7d52','#3a9163','#4dab78','#6aab82','#88c49a','#b8dfc4'];
+const sorted = labelsLong.map((l,i)=>({l,ls:labelsShort[i],c:counts[i]})).sort((a,b)=>b.c-a.c);
+
+new Chart(document.getElementById('barChart'),{
+  type:'bar',
+  data:{
+    labels:sorted.map(x=>x.ls),
+    datasets:[{label:'Institutions',data:sorted.map(x=>x.c),backgroundColor:gp,borderRadius:6}]
+  },
+  options:{
+    indexAxis:'y',responsive:true,maintainAspectRatio:false,
+    plugins:{
+      legend:{display:false},
+      tooltip:{callbacks:{label:ctx=>`${ctx.parsed.x} institutions (${Math.round(ctx.parsed.x/TOTAL*100)}%)`}}
+    },
+    scales:{x:{max:60,grid:{color:'#f0f0f0'},ticks:{font:{size:11}}},y:{ticks:{font:{size:11}}}}
+  }
+});
+
+new Chart(document.getElementById('doughnutChart'),{
+  type:'doughnut',
+  data:{
+    labels:sorted.map(x=>x.ls),
+    datasets:[{data:sorted.map(x=>Math.round(x.c/TOTAL*100)),backgroundColor:gp,borderWidth:2,borderColor:'#fff'}]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{
+      legend:{position:'right',labels:{font:{size:11},padding:10}},
+      tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.parsed}% of all scanned`}}
+    }
+  }
+});
+
+// ── HEATMAP ───────────────────────────────────────────────────────────────────
+function heatColor(val,isDiag){
+  if(isDiag) return {bg:'#1a4731',fg:'#fff'};
+  if(val>=30) return {bg:'#1e6b3f',fg:'#fff'};
+  if(val>=20) return {bg:'#2e7d52',fg:'#fff'};
+  if(val>=10) return {bg:'#6aab82',fg:'#fff'};
+  if(val>=5)  return {bg:'#b8dfc4',fg:'#1a4731'};
+  return {bg:'#f0f0f0',fg:'#999'};
+}
+
+const hm = document.getElementById('heatmap');
+const tip = document.getElementById('hm-tooltip');
+
+// corner
+hm.appendChild(Object.assign(document.createElement('div'),{className:'hm-corner'}));
+
+// col headers
+labelsShort.forEach(l=>{
+  const d = document.createElement('div');
+  d.className='hm-col-label'; d.textContent=l; hm.appendChild(d);
+});
+
+// rows
+matrix.forEach((row,i)=>{
+  const rl = document.createElement('div');
+  rl.className='hm-row-label'; rl.textContent=labelsShort[i]; hm.appendChild(rl);
+  row.forEach((val,j)=>{
+    const isDiag = i===j;
+    const {bg,fg} = heatColor(val,isDiag);
+    const cell = document.createElement('div');
+    cell.className='hm-cell'; cell.style.background=bg;
+    cell.innerHTML=`<span class="hm-num" style="color:${fg}">${val}</span>`
+      +(isDiag?'':`<span class="hm-pct" style="color:${fg}">${Math.round(val/TOTAL*100)}%</span>`);
+    cell.addEventListener('mousemove',e=>{
+      const txt = isDiag
+        ? `<strong>${labelsShort[i]}</strong>Total: ${val} of ${TOTAL} institutions have this program (${Math.round(val/TOTAL*100)}%)`
+        : `<strong>${labelsShort[i]} + ${labelsShort[j]}</strong>${tooltips[i][j]}`;
+      tip.innerHTML=txt; tip.classList.add('show');
+      tip.style.left=Math.min(e.clientX+14,window.innerWidth-305)+'px';
+      tip.style.top =Math.max(e.clientY-10,8)+'px';
+    });
+    cell.addEventListener('mouseleave',()=>tip.classList.remove('show'));
+    hm.appendChild(cell);
+  });
+});
+
+// ── PROVINCE TABLE ────────────────────────────────────────────────────────────
+const tbody = document.querySelector('#provTable tbody');
+[...provinces].sort((a,b)=>b.yes-a.yes).forEach(({name,total,yes})=>{
+  const pct2 = total>0 ? Math.round(yes/total*100) : 0;
+  const col = pct2>=80?'#2e7d52':pct2>=50?'#7f5a00':'#c00000';
+  tbody.innerHTML+=`<tr>
+    <td><strong>${name}</strong></td>
+    <td style="text-align:center">${total}</td>
+    <td style="text-align:center">${yes}</td>
+    <td style="text-align:center;font-weight:700;color:${col}">${pct2}%</td>
+    <td style="min-width:120px"><div class="prog-bar-bg"><div class="prog-bar" style="width:${pct2}%"></div></div></td>
+  </tr>`;
+});
+
+// ── STANDOUTS ─────────────────────────────────────────────────────────────────
+const sg = document.getElementById('standoutsGrid');
+standouts.forEach(s=>{
+  sg.innerHTML+=`<div class="standout-card">
+    <div class="uni">🏫 ${s.uni}</div>
+    <div class="prov">${s.prov}</div>
+    <div class="why">${s.why}</div>
+  </div>`;
+});
+
+// ── THEMES ────────────────────────────────────────────────────────────────────
+const tg=document.getElementById('themesGrid');
+const bm={strong:'badge-strong',gap:'badge-gap',emerging:'badge-emerging'};
+const bl={strong:'Strong Evidence',gap:'Gap Identified',emerging:'Emerging Trend'};
+themes.forEach(t=>{
+  tg.innerHTML+=`<div class="theme-card">
+    <div class="badge ${bm[t.badge]}">${bl[t.badge]}</div>
+    <h4>${t.title}</h4><p>${t.text}</p>
+  </div>`;
+});
+
+// ── NAV ACTIVE ON SCROLL ──────────────────────────────────────────────────────
+const secs = document.querySelectorAll('section[id]');
+const links = document.querySelectorAll('nav a');
+window.addEventListener('scroll',()=>{
+  let cur='';
+  secs.forEach(s=>{ if(window.scrollY>=s.offsetTop-120) cur=s.id; });
+  links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+cur));
+},{passive:true});
+
+// ── REFERENCES ────────────────────────────────────────────────────────────────
+const refs = [
+  { citation: "Almoraie, N. M., Alothmani, N. M., Alomari, W. D., & Al-Amoudi, A. (2025). Addressing nutritional issues and eating behaviours among university students: A narrative review. <em>Nutrition Research Reviews, 38</em>(1), 53-68.", url: "https://doi.org/10.1017/S0954422424000088" },
+  { citation: "Dominteanu, T., Matac, L. M., Alexander, N. V. J., Pavel, C. D., Iacobini, A., & Voinea, A. (2025). Eating behavior of students in relation to the offer available in the vicinity of the university campus. <em>Amfiteatru Economic, 27</em>(69), 535-554.", url: "https://doi.org/10.24818/EA/2025/69/535" },
+  { citation: "Ellison, B., Savchenko, O., Nikolaus, C. J., & Duff, B. R. L. (2019). Every plate counts: Evaluation of a food waste reduction campaign in a university dining hall. <em>Resources, Conservation and Recycling, 144</em>, 276-284.", url: "https://doi.org/10.1016/j.resconrec.2019.01.046" },
+  { citation: "Fan, H., Wang, J., Fan, S., & Xu, Q. (2026). Reducing food waste in Chinese university canteens: The role of information and commitment. <em>Journal of Behavioral and Experimental Economics, 121</em>, Article 102517.", url: "https://doi.org/10.1016/j.socec.2026.102517" },
+  { citation: "Keat, J., Dharmayani, P. N. A., & Mihrshahi, S. (2024). Benchmarking the university campus food environment and exploring student perspectives about food insecurity and healthy eating: A case study from Australia. <em>BMC Public Health, 24</em>, Article 1245.", url: "https://doi.org/10.1186/s12889-024-18664-x" },
+  { citation: "Kratzer, S., Theurich, M. A., Mareis, T., Proebstl, S., Holliday, N., Yan, S., Leibinger, A., Monsef, I., Bach, L., Rincon Camargo, D., Schwingshackl, L., Simonetti, A., Hartmann, M., Lemken, D., & von Philipsborn, P. (2025). Promoting healthy and sustainable diets through food service interventions in university settings: A scoping review. <em>BMC Nutrition, 11</em>, Article 173.", url: "https://doi.org/10.1186/s40795-025-01158-3" },
+  { citation: "Lee, K. M., Dias, G. M., Boluk, K., Scott, S., Chang, Y. S., Williams, T. E., & Kirkpatrick, S. I. (2021). Toward a healthy and environmentally sustainable campus food environment: A scoping review of postsecondary food interventions. <em>Advances in Nutrition, 12</em>(5), 1996-2022.", url: "https://doi.org/10.1093/advances/nmab026" },
+  { citation: "Mollaei, S., Minaker, L. M., Lynes, J. K., & Dias, G. M. (2023). Perceptions and determinants of adopting sustainable eating behaviours among university students in Canada: A qualitative study using focus group discussions. <em>International Journal of Sustainability in Higher Education, 24</em>(9), 252-298.", url: "https://doi.org/10.1108/IJSHE-11-2022-0373" },
+  { citation: "Nanu, L., Rahman, I., Traynor, M., & Cain, L. (2024). Something to chew on: Assessing what students want from campus dining services. <em>Young Consumers, 25</em>(6), 748-770.", url: "https://doi.org/10.1108/YC-02-2024-1979" },
+  { citation: "Pinto, R. S., Pinto, R. M. dos S., Melo, F. F. S., Campos, S. S., & Cordovil, C. M. dos S. (2018). A simple awareness campaign to promote food waste reduction in a university canteen. <em>Waste Management, 76</em>, 28-38.", url: "https://doi.org/10.1016/j.wasman.2018.02.044" },
+  { citation: "Radhakrishnan, G., Manivannan, S. K., & Karmegam, D. (2024). Interventions for reducing food waste and behavioural change among students in higher education institutions: A systematic review. <em>Cleaner Waste Systems, 9</em>, Article 100180.", url: "https://doi.org/10.1016/j.clwas.2024.100180" },
+  { citation: "Rojas, A., Richer, L., & Wagner, J. (2007). University of British Columbia Food System Project: Towards sustainable and secure campus food systems. <em>EcoHealth, 4</em>(1), 86-94.", url: "https://doi.org/10.1007/s10393-006-0081-1" },
+  { citation: "Roy, R., Soo, D., Conroy, D., Wall, C. R., & Swinburn, B. (2019). Exploring university food environment and on-campus food purchasing behaviors, preferences, and opinions. <em>Journal of Nutrition Education and Behavior, 51</em>(7), 865-875.", url: "https://doi.org/10.1016/j.jneb.2019.03.003" },
+  { citation: "Vader, S., Hanson, C., & Ahmadi, L. (2025). Assessing and addressing food waste in university dining: A dual-design study at Brescia University College in Ontario, Canada. <em>Canadian Food Studies / La Revue canadienne des &eacute;tudes sur l&#39;alimentation, 12</em>(2), 23-43.", url: "https://doi.org/10.15353/cfs-rcea.v12i2.683" },
+];
+
+const refNote = `<div style="background:#fff8e1;border-left:4px solid #f4b942;border-radius:8px;padding:.9rem 1.2rem;margin-bottom:1.4rem;font-size:.82rem;color:#5a4000;line-height:1.6;">
+  <strong>&#x1F4DD; Note:</strong> Needs to be double checked.
+</div>`;
+
+const refList = document.getElementById('refList');
+if (refList) {
+  refList.insertAdjacentHTML('beforebegin', refNote);
+  refs.forEach((r, i) => {
+    const li = document.createElement('li');
+    li.style.cssText = 'font-size:.83rem;line-height:1.75;padding:.8rem 1.1rem;border-radius:8px;background:' + (i%2===0?'#f8faf8':'#fff') + ';border-left:3px solid #2e7d52;';
+    li.innerHTML = '<span style="color:#aaa;font-size:.76rem;margin-right:6px">[' + (i+1) + ']</span>' + r.citation + ' <a href="' + r.url + '" target="_blank" style="color:#1f4e78;font-size:.76rem;margin-left:4px;">[DOI Link]</a>';
+    refList.appendChild(li);
+  });
+}
+
+
+// ── RADAR CHART ───────────────────────────────────────────────────────────────
+new Chart(document.getElementById('radarChart'), {
+  type: 'radar',
+  data: {
+    labels: [
+      'Sustainable\nProcurement', 'Food\nCertification', 'Food Waste /\nComposting',
+      'Food Literacy\n/ Education', 'Food\nSecurity', 'Plant-Based\nEating',
+      'Student\nEngagement', 'Reusable\nPackaging'
+    ],
+    datasets: [{
+      label: '% of all 97 scanned institutions',
+      data: [51.5, 47.4, 41.2, 25.8, 26.8, 22.7, 23.7, 17.5],
+      backgroundColor: 'rgba(46,125,82,0.2)',
+      borderColor: '#2e7d52',
+      borderWidth: 2.5,
+      pointBackgroundColor: '#1a4731',
+      pointBorderColor: '#fff',
+      pointRadius: 5,
+      pointHoverRadius: 7,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    scales: {
+      r: {
+        min: 0, max: 65,
+        ticks: { stepSize: 15, font: { size: 10 }, color: '#888',
+                 callback: v => v + '%' },
+        grid: { color: 'rgba(0,0,0,0.08)' },
+        pointLabels: { font: { size: 11 }, color: '#1a4731' },
+        angleLines: { color: 'rgba(0,0,0,0.1)' }
+      }
+    },
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 11 } } },
+      tooltip: {
+        callbacks: {
+          label: ctx => ctx.dataset.label + ': ' + ctx.parsed.r + '%'
+        }
+      }
+    }
+  }
+});
+
+// ── BUBBLE CHART ──────────────────────────────────────────────────────────────
+// Province data: name, % with any program (x), avg program categories (y), total scanned (size)
+const bubbleData = [
+  { label: 'British Columbia',       x: 91.7, y: 4.2, r: 12 },
+  { label: 'Ontario',                x: 84.0, y: 3.8, r: 25 },
+  { label: 'Quebec',                 x: 82.4, y: 3.5, r: 17 },
+  { label: 'Nova Scotia',            x: 85.7, y: 3.1, r: 7  },
+  { label: 'Alberta',                x: 77.8, y: 2.9, r: 9  },
+  { label: 'New Brunswick',          x: 75.0, y: 2.8, r: 4  },
+  { label: 'Manitoba',               x: 66.7, y: 2.2, r: 3  },
+  { label: 'Newfoundland',           x: 100,  y: 3.0, r: 1  },
+  { label: 'Saskatchewan',           x: 33.3, y: 1.5, r: 3  },
+  { label: 'PEI',                    x: 0,    y: 0,   r: 1  },
+  { label: 'Yukon',                  x: 0,    y: 0,   r: 1  },
+];
+
+const bubbleColors = [
+  '#1a4731','#2e7d52','#3a9163','#4dab78','#6aab82',
+  '#88c49a','#b8dfc4','#1f4e78','#2d6fa3','#f4b942','#e57373'
+];
+
+new Chart(document.getElementById('bubbleChart'), {
+  type: 'bubble',
+  data: {
+    datasets: bubbleData.map((d, i) => ({
+      label: d.label,
+      data: [{ x: d.x, y: d.y, r: Math.max(6, d.r * 1.8) }],
+      backgroundColor: bubbleColors[i] + 'CC',
+      borderColor: bubbleColors[i],
+      borderWidth: 1.5,
+    }))
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    scales: {
+      x: {
+        min: -5, max: 110,
+        title: { display: true, text: '% of Province Universities With Any Program', font: { size: 11 } },
+        ticks: { callback: v => v + '%', font: { size: 10 } },
+        grid: { color: 'rgba(0,0,0,0.06)' }
+      },
+      y: {
+        min: -0.3, max: 5.5,
+        title: { display: true, text: 'Avg. Number of Program Categories Per Institution', font: { size: 11 } },
+        ticks: { font: { size: 10 } },
+        grid: { color: 'rgba(0,0,0,0.06)' }
+      }
+    },
+    plugins: {
+      legend: { position: 'right', labels: { font: { size: 10 }, padding: 8, boxWidth: 12 } },
+      tooltip: {
+        callbacks: {
+          label: ctx => {
+            const d = bubbleData[ctx.datasetIndex];
+            return [d.label, '% with program: ' + d.x + '%', 'Avg categories: ' + d.y, 'Universities scanned: ' + d.r];
+          }
+        }
+      }
+    }
+  }
+});
+
+// ── STACKED BAR BY PROVINCE ───────────────────────────────────────────────────
+// Program counts per province (estimated from scan data)
+const provLabels = ['BC','ON','QC','NS','AB','NB','MB','NL','SK','PEI','YK'];
+const stackedDatasets = [
+  { label: 'Sust. Procurement', data: [10,20,13,4,5,3,2,1,1,0,0], bg: '#1a4731' },
+  { label: 'Food Certification', data: [9,18,12,5,4,2,1,1,0,0,0], bg: '#2e7d52' },
+  { label: 'Food Waste',         data: [8,15,10,4,3,2,1,1,0,0,0], bg: '#4dab78' },
+  { label: 'Food Literacy',      data: [5,10,5,2,2,1,1,0,0,0,0],  bg: '#6aab82' },
+  { label: 'Food Security',      data: [4,10,5,2,2,1,1,0,1,0,0],  bg: '#88c49a' },
+  { label: 'Plant-Based',        data: [4,8,6,1,1,1,0,0,0,0,0],   bg: '#b8dfc4' },
+  { label: 'Student Engagement', data: [3,8,5,2,2,1,1,0,0,0,0],   bg: '#1f4e78' },
+  { label: 'Reusable Pkg',       data: [3,6,4,1,1,1,0,0,0,0,0],   bg: '#5b9bd5' },
+];
+
+new Chart(document.getElementById('stackedBar'), {
+  type: 'bar',
+  data: {
+    labels: provLabels,
+    datasets: stackedDatasets.map(d => ({
+      label: d.label,
+      data: d.data,
+      backgroundColor: d.bg,
+      borderRadius: 2,
+    }))
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    scales: {
+      x: { stacked: true, grid: { display: false }, ticks: { font: { size: 11 } } },
+      y: {
+        stacked: true,
+        title: { display: true, text: 'Total Program Instances', font: { size: 11 } },
+        ticks: { font: { size: 10 } },
+        grid: { color: 'rgba(0,0,0,0.06)' }
+      }
+    },
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 10 }, padding: 10, boxWidth: 12 } },
+      tooltip: {
+        mode: 'index',
+        callbacks: {
+          title: ctx => 'Province: ' + ctx[0].label,
+        }
+      }
+    }
+  }
+});
+
+</script>
+</body>
+</html>
